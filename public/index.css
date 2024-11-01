@@ -1,0 +1,26 @@
+@import "https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css";
+
+:root {
+  --bulma-family-primary: Fredoka, Poppins, sans-serif;
+}
+
+html {
+  font-size: 14px;
+}
+
+body {
+  font-family: var(--bulma-family-primary);
+}
+
+
+.tab-content > div {
+  display: none;
+}
+
+.tab-content > div.is-active-tab {
+  display: block;
+}
+
+.tab-content {
+  padding: 20px;
+}
