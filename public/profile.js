@@ -5,9 +5,13 @@ function getSavingProfile() {
     return {
         id: profileId,
         name: document.getElementById('name')?.value,
+        shop: document.getElementById('shop')?.value,
+        store_password: document.getElementById('store_password')?.value,
+        email: document.getElementById('email')?.value,
         first_name: document.getElementById('first_name')?.value,
         last_name: document.getElementById('last_name')?.value,
-        email: document.getElementById('email')?.value,
+        address: document.getElementById('address')?.value,
+        city: document.getElementById('city')?.value,
         postal_code: document.getElementById('postal_code')?.value,
         variants: document.getElementById('variants')?.value,
         discount: document.getElementById('discount')?.value
@@ -44,6 +48,11 @@ function validProfile() {
         if (nullableProfileField.includes(e.id)) {
             return false
         }
+
+        if (e.id == 'shop') {
+            return !e.value.endsWith('.myshopify.com')
+        }
+
         return !Boolean(e.value)
     })
 

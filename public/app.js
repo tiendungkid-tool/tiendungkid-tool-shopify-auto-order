@@ -16,6 +16,9 @@ function createProfileCard(profile) {
         <div class="card-content">
             <div class="content">
                 <div>ID: <b>${profile.id}</b></div>
+                <div>Shop: <b>${profile.shop}</b></div>
+                <div>Store password: <b>${profile.store_password}</b></div>
+                ${profile.discount ? `<div>Discount code: <b>${profile.discount}</b></div>` : ''}
                 ${profile.variants.map(e => `Variant: ${e.variant_id}, Quantity: ${e.quantity}`).join('<br/>')}
             </div>
         </div>
@@ -75,8 +78,6 @@ function runProfile(profileId) {
     }
 
     const run = (profile) => {
-        console.log(profile);
-        
         fetch('/run', {
             method: 'POST',
             body: JSON.stringify(profile),
