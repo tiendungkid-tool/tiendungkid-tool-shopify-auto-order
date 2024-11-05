@@ -7,6 +7,7 @@ function getSavingProfile() {
         name: document.getElementById('name')?.value,
         shop: document.getElementById('shop')?.value,
         store_password: document.getElementById('store_password')?.value,
+        ref_code: document.getElementById('ref_code')?.value,
         email: document.getElementById('email')?.value,
         first_name: document.getElementById('first_name')?.value,
         last_name: document.getElementById('last_name')?.value,
@@ -62,6 +63,14 @@ function validProfile() {
     return invalidElements.length == 0
 }
 
+function detachDiscount(discount) {
+    if (!discount) {
+        return []
+    }
+
+    return discount.split(',').map(e => e.trim())
+}
+
 function saveProfile() {
     if (!validProfile()) {
         return
@@ -73,6 +82,8 @@ function saveProfile() {
     if (!profile.variants) {
         return
     }
+
+    profile.discount = detachDiscount(profile.discount)
 
     UpPromoteIndexedDB.createProfile(profile)
     clearInput()

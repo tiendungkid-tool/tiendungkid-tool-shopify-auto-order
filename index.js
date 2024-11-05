@@ -14,7 +14,11 @@ app.get('/', (_, res) => {
 })
 
 app.post('/run', async (req, res) => {
-  await runCrawler(req.body)
+  try {
+    await runCrawler(req.body)
+  } catch (error) {
+    console.log(error)
+  }
   return res.json({})
 })
 

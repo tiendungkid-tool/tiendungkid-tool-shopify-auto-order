@@ -1,3 +1,4 @@
+const { timeout } = require('puppeteer');
 const puppeteer = require('puppeteer')
 
 async function runCrawler (profile) {
@@ -7,10 +8,12 @@ async function runCrawler (profile) {
     const page = await browser.newPage()
     await page.goto(`https://${profile.shop}`)
     const currentUrlPath = new URL(page.url())
+    const isCombineDiscountCodes = profile.discount.length > 1;
     
     if (currentUrlPath.pathname == '/password') {
         await fillPassword(page, profile)
     }
+    await redirectToRefCode(page, profile)
     await addToCart(page, profile)
     await applyDiscountCode(page, profile.discount)
     await page.goto(`https://${profile.shop}/checkout`)
@@ -18,11 +21,13 @@ async function runCrawler (profile) {
     await fillState(page, profile)
     await fillCustomerInformation(page, profile)
     await focusBodyToLoadShippingRate(page)
+    if (isCombineDiscountCodes) {
+        await applyOnCheckoutDiscount(page, profile.discount)
+    }
     await fillCreditCard(page)
     await page.focus('#checkout-pay-button')
     await page.click('#checkout-pay-button')
-    await page.waitForNavigation()
-    browser.close()
+    await finishTracking(browser, page, profile)
 }
 
 /**
@@ -42,6 +47,7 @@ async function sleepClient(page, timeout) {
  * @param {*} profile 
  */
 async function fillCustomerInformation(page, profile) {
+    await page.waitForSelector('#email')
     const fillInfo = [
         {
             selector: '#email',
@@ -85,12 +91,26 @@ async function fillCustomerInformation(page, profile) {
  * @param {puppeteer.Page} page 
  * @param {string} code 
  */
-async function applyDiscountCode(page, code) {
-    await page.evaluate(async (code) => {
-        await fetch(`/discount/${code}`)
-    }, code)
+async function applyOnCheckoutDiscount(page, codes) {
+    await page.waitForSelector('input[name="reductions"]')
+    await page.focus('input[name="reductions"]')
+    await page.keyboard.type(codes[1], { delay: 100 })
+    await page.keyboard.press('Enter')
+    await page.waitForSelector('#gift-card-field form + div ul li:nth-child(2)')
 }
 
+/**
+ * 
+ * @param {puppeteer.Page} page 
+ * @param {string[]} codes
+ */
+async function applyDiscountCode(page, codes) {
+    if (codes.length > 0) {
+        await page.evaluate(async (code) => {
+            await fetch(`/discount/${code}`)
+        }, codes[0])
+    }
+}
 
 /**
  * @param {puppeteer.Page} page 
@@ -186,6 +206,36 @@ async function fillState(page, profile) {
 async function focusBodyToLoadShippingRate(page) {
     await page.focus('input[name=lastName]')
     await page.waitForSelector('#shipping_methods')
+}
+
+/**
+ * 
+ * @param {puppeteer.Page} page 
+ * @param {profile} profile 
+ */
+async function redirectToRefCode(page, profile) {
+    await page.goto(`https://${profile.shop}?sca_ref=${profile.ref_code}`)
+
+    const cookies = await page.cookies();
+    const receivedBefore = cookies.find(e => e.name === 'up_uppromote_aid')
+    if (receivedBefore) {
+        return
+    }
+
+    await page.waitForRequest('https://pixel-test.uppromote.com/api/logs')
+}
+
+async function finishTracking(browser, page, _profile) {
+    try {
+        await page.waitForNavigation()
+        await page.waitForRequest('https://pixel-test.uppromote.com/api/logs', {
+            timeout: 3e3
+        })
+        await page.waitForSelector('#checkout-main')
+    } catch (error) {
+
+    }
+    browser.close()
 }
 
 module.exports = runCrawler 
