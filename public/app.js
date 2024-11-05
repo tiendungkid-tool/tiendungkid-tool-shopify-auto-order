@@ -78,6 +78,8 @@ function runProfile(profileId) {
     }
 
     const run = (profile) => {
+        console.log(profile);
+        
         fetch('/run', {
             method: 'POST',
             body: JSON.stringify(profile),

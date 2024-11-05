@@ -14,13 +14,26 @@ async function runCrawler (profile) {
     await addToCart(page, profile)
     await applyDiscountCode(page, profile.discount)
     await page.goto(`https://${profile.shop}/checkout`)
+    await fillCountry(page, profile)
+    await fillState(page, profile)
     await fillCustomerInformation(page, profile)
+    await focusBodyToLoadShippingRate(page)
     await fillCreditCard(page)
     await page.focus('#checkout-pay-button')
     await page.click('#checkout-pay-button')
     await page.waitForNavigation()
-    await page.waitForNetworkIdle()
     browser.close()
+}
+
+/**
+ * 
+ * @param {puppeteer.Page} page 
+ * @param {*} profile 
+ */
+async function sleepClient(page, timeout) {
+    await page.evaluate(async (timeout) => {
+        return new Promise(resolve => setTimeout(resolve, timeout));
+    }, timeout)
 }
 
 /**
@@ -62,11 +75,9 @@ async function fillCustomerInformation(page, profile) {
         }
         await page.focus(info.selector)
         await page.keyboard.type(String(info.value), {
-            delay: 10
+            delay: 20
         })
     }
-
-    await page.waitForSelector('#shipping_methods')
 }
 
 /**
@@ -85,9 +96,7 @@ async function applyDiscountCode(page, code) {
  * @param {puppeteer.Page} page 
  */
 async function fillCreditCard(page) {
-    await page.evaluate(async () => {
-        return new Promise(resolve => setTimeout(resolve, 1e3));
-    })
+    await sleepClient(page, 1e3)
     const frameSelector = 'div[data-card-fields=number] iframe'
     await page.focus(frameSelector)
     const frame = await page.waitForSelector(frameSelector)
@@ -97,9 +106,7 @@ async function fillCreditCard(page) {
     }, frame)
     const offset = {x: 213 + 5, y: 11 + 5}
     await page.mouse.click(rect.x + offset.x, rect.y + offset.y)
-    await page.evaluate(async () => {
-        return new Promise(resolve => setTimeout(resolve, 1e3));
-    })
+    await sleepClient(page, 1e3)
     await page.keyboard.type('1', { delay: 200 })
     await page.keyboard.press('Tab', { delay: 200 })
     await page.keyboard.type('1255', { delay: 200 })
@@ -144,6 +151,41 @@ async function addToCart(page, profile) {
             body: JSON.stringify(form)
         })
     }, profile)
+}
+
+/**
+ * 
+ * @param {puppeteer.Page} page 
+ * @param {*} profile 
+ */
+async function fillCountry(page, profile) {
+    if (!profile.country) {
+        return
+    }
+    await page.select('select[name=countryCode]', profile.country)
+    await sleepClient(page, 5e2)
+}
+
+/**
+ * 
+ * @param {puppeteer.Page} page 
+ * @param {*} profile 
+ */
+async function fillState(page, profile) {
+    if (!profile.state) {
+        return
+    }
+    await sleepClient(page, 5e2)
+    await page.focus('select[name=zone]')
+    await page.select('select[name=zone]', profile.state)
+    await sleepClient(page, 1e3)
+}
+/**
+ * @param {puppeteer.Page} page 
+ */
+async function focusBodyToLoadShippingRate(page) {
+    await page.focus('input[name=lastName]')
+    await page.waitForSelector('#shipping_methods')
 }
 
 module.exports = runCrawler 

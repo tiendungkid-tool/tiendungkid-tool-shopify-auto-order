@@ -1,0 +1,67 @@
+[
+    {
+        "id": "profile-1730711526726",
+        "name": "Checkout 1",
+        "shop": "tiendungkid6.myshopify.com",
+        "store_password": "1",
+        "email": "test@gmail.com",
+        "first_name": "Phan",
+        "last_name": "Dũng",
+        "address": "10A, Ngõ 158, Yên Hoà",
+        "city": "Hà Nội",
+        "postal_code": "11300",
+        "variants": [
+            {
+                "variant_id": 40316470526012,
+                "quantity": 4
+            },
+            {
+                "variant_id": 40316470427708,
+                "quantity": 2
+            }
+        ],
+        "discount": ""
+    },
+    {
+        "id": "profile-1730711920591",
+        "name": "Checkout 2",
+        "shop": "tiendungkid6.myshopify.com",
+        "store_password": "1",
+        "email": "test@gmail.com",
+        "first_name": "Phan",
+        "last_name": "Dũng",
+        "address": "10A, Ngõ 158, Yên Hoà",
+        "city": "Hà Nội",
+        "postal_code": "11300",
+        "variants": [
+            {
+                "variant_id": 40316470526012,
+                "quantity": 5
+            }
+        ],
+        "discount": "code11"
+    },
+    {
+        "id": "profile-1730718229314",
+        "name": "Matthew",
+        "shop": "mat-test-80.myshopify.com",
+        "store_password": "1",
+        "email": "test@gmail.com",
+        "first_name": "Phan",
+        "last_name": "Dũng",
+        "address": "10A, Ngõ 158, Yên Hoà",
+        "city": "Hà Nội",
+        "postal_code": "11300",
+        "variants": [
+            {
+                "variant_id": 41653165424663,
+                "quantity": 1
+            },
+            {
+                "variant_id": 41653165162519,
+                "quantity": 2
+            }
+        ],
+        "discount": ""
+    }
+]

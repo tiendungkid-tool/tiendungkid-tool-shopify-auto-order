@@ -11,6 +11,8 @@ function getSavingProfile() {
         first_name: document.getElementById('first_name')?.value,
         last_name: document.getElementById('last_name')?.value,
         address: document.getElementById('address')?.value,
+        country: document.getElementById('country')?.value,
+        state: document.getElementById('state')?.value,
         city: document.getElementById('city')?.value,
         postal_code: document.getElementById('postal_code')?.value,
         variants: document.getElementById('variants')?.value,
@@ -40,7 +42,7 @@ function clearInput() {
 }
 
 function validProfile() {
-    const nullableProfileField = ['discount']
+    const nullableProfileField = ['discount', 'country', 'state']
     const elements = [...document.querySelectorAll('.add-profile input')]
     elements.forEach(e => e.classList.remove('is-danger'))
 

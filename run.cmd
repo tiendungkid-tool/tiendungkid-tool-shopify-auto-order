@@ -1,1 +1,1 @@
-node index.js | start chrome "http://localhost:3000"
+nodemon -L index.js | start chrome "http://localhost:3000"
