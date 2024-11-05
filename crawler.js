@@ -215,14 +215,13 @@ async function focusBodyToLoadShippingRate(page) {
  */
 async function redirectToRefCode(page, profile) {
     await page.goto(`https://${profile.shop}?sca_ref=${profile.ref_code}`)
-
-    const cookies = await page.cookies();
-    const receivedBefore = cookies.find(e => e.name === 'up_uppromote_aid')
-    if (receivedBefore) {
-        return
+    try {
+        await page.waitForRequest('https://pixel-test.uppromote.com/api/logs', {
+            timeout: 3e3
+        })
+    } catch (e) {
+        // Maximum wait tracking click
     }
-
-    await page.waitForRequest('https://pixel-test.uppromote.com/api/logs')
 }
 
 async function finishTracking(browser, page, _profile) {
