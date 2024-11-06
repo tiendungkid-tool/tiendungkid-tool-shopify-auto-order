@@ -10,8 +10,7 @@ const UpPromoteIndexedDB = {
     getProfiles: null,
     deleteProfile: null,
     findProfile: null,
-    updateProfile: null,
-    createProfile: null,
+    createOrUpdateProfile: null,
     initial: async () => {
         let loop = 0
         while (
@@ -68,6 +67,13 @@ const onConnectedDB = function (ev) {
             .objectStore(UpPromoteIndexedDB.collections.profiles)
             .delete(profileId)
         return true
+    }
+    
+    UpPromoteIndexedDB.createOrUpdateProfile = (profile) => {
+        return UpPromoteIndexedDB.database
+            .transaction(UpPromoteIndexedDB.collections.profiles, 'readwrite')
+            .objectStore(UpPromoteIndexedDB.collections.profiles)
+            .put(profile, profile.id)
     }
 }
 

@@ -24,6 +24,7 @@ async function runCrawler (profile) {
     if (isCombineDiscountCodes) {
         await applyOnCheckoutDiscount(page, profile.discount)
     }
+    await applyTip(page, profile.tip)
     await fillCreditCard(page)
     await page.focus('#checkout-pay-button')
     await page.click('#checkout-pay-button')
@@ -221,6 +222,27 @@ async function redirectToRefCode(page, profile) {
         })
     } catch (e) {
         // Maximum wait tracking click
+    }
+}
+
+/**
+ * 
+ * @param {puppeteer.Page} page 
+ * @param {number} tipValue 
+ */
+async function applyTip(page, tipValue) {
+
+    if (!tipValue) {
+        return
+    }
+    try {
+        await page.focus('#TipsInput')
+        await page.keyboard.type(String(tipValue), {
+            delay: 100
+        })
+        await page.focus('#tipping_list-tipping_list_options-collapsible button[type=submit]')
+        await page.keyboard.press('Enter')
+    } catch (error) {
     }
 }
 

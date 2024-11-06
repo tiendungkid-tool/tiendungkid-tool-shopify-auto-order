@@ -3,7 +3,7 @@ const saveBtn = document.getElementById('save-profile')
 function getSavingProfile() {
     const profileId = 'profile-' + Date.now();
     return {
-        id: profileId,
+        id: document.getElementById('profile_id')?.value || profileId,
         name: document.getElementById('name')?.value,
         shop: document.getElementById('shop')?.value,
         store_password: document.getElementById('store_password')?.value,
@@ -17,7 +17,8 @@ function getSavingProfile() {
         city: document.getElementById('city')?.value,
         postal_code: document.getElementById('postal_code')?.value,
         variants: document.getElementById('variants')?.value,
-        discount: document.getElementById('discount')?.value
+        discount: document.getElementById('discount')?.value,
+        tip: document.getElementById('tip')?.value
     }
 }
 
@@ -43,7 +44,7 @@ function clearInput() {
 }
 
 function validProfile() {
-    const nullableProfileField = ['discount', 'country', 'state']
+    const nullableProfileField = ['discount', 'country', 'state', 'tip', 'profile_id']
     const elements = [...document.querySelectorAll('.add-profile input')]
     elements.forEach(e => e.classList.remove('is-danger'))
 
@@ -78,18 +79,17 @@ function saveProfile() {
 
     const profile = getSavingProfile()
     profile.variants = detachVariants(profile.variants)
-
     if (!profile.variants) {
         return
     }
-
     profile.discount = detachDiscount(profile.discount)
-
-    UpPromoteIndexedDB.createProfile(profile)
-    clearInput()
-    alert('Saved')
-    changeTab('profiles')
-    loadSavedProfiles()
+    const result = UpPromoteIndexedDB.createOrUpdateProfile(profile)
+    result.onsuccess = () => {
+        clearInput()
+        alert('Saved')
+        changeTab('profiles')
+        loadSavedProfiles()
+    }
 }
 
 
