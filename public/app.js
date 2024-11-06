@@ -24,7 +24,8 @@ function createProfileCard(profile) {
                 <div>Shop: <b>${profile.shop}</b></div>
                 <div>Store password: <b>${profile.store_password}</b></div>
                 ${profile.discount ? `<div>Discount code: <b>${profile.discount}</b></div>` : ''}
-                ${profile.variants.map(e => `Variant: ${e.variant_id}, Quantity: ${e.quantity}`).join('<br/>')}
+                <div>${profile.variants.map(e => `Variant: ${e.variant_id}, Quantity: ${e.quantity}`).join('<br/>')}</div>
+                ${profile.tip ? `<div>Tip: <b>${profile.tip}</b></div>` : ''}
             </div>
         </div>
     `
