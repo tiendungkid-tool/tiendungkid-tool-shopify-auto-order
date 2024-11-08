@@ -36,8 +36,8 @@ async function runCrawler (profile) {
     await fillCreditCard(page)
     logProcessStack('Start complete order')
     await page.focus('#checkout-pay-button')
-    await page.click('#checkout-pay-button')
     await waitForCaptcha(page)
+    await page.click('#checkout-pay-button')
     await finishTracking(browser, page, profile)
     logProcessStack('Finished -------------------------------------')
 }
