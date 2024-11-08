@@ -1,18 +1,13 @@
-const puppeteer = require('puppeteer-extra')
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-puppeteer.use(StealthPlugin())
+const puppeteer = require('puppeteer')
 
 let processingProfileId = null
-
 async function runCrawler (profile) {
     processingProfileId = profile.id
     logProcessStack('Starting')
     const browser = await puppeteer.launch({
-        headless: false,
-        args: ["--ash-host-window-bounds=1920x1080", "--window-size=1920,1048", "--window-position=0,0"],
+        headless: false
     })
     const page = await browser.newPage()
-    await page.setViewport({ width: 1920, height: 1080 })
     await page.goto(`https://${profile.shop}`)
     const currentUrlPath = new URL(page.url())
     const isCombineDiscountCodes = profile.discount.length > 1;
@@ -274,19 +269,22 @@ async function applyTip(page, tipValue) {
  * @param {puppeteer.Page} page
  */
 async function waitForCaptcha(page) {
-    const requireCaptcha = await page.$('textarea#g-recaptcha-response')
+    const requireCaptcha = Boolean(await page.$('textarea#g-recaptcha-response'))
     if (!requireCaptcha) {
         return
     }
-    let waitTime = 1
-    try {
-        if (waitTime <= 3) {
-            await page.waitForSelector('iframe[src=captcha][data-hcaptcha-response=*]', {
-                timeout: 10e3
-            })
+
+    const maxSecondToWait = 300 // 5 minutes
+    let currentWaitTime = 1;
+    let finishedCaptcha = false
+
+    while (currentWaitTime <= maxSecondToWait && !finishedCaptcha) {
+        try {
+            finishedCaptcha = await page.$eval('textarea#g-recaptcha-response', (input) => input.value)
+        } catch (error) {
         }
-    } catch (error) {
-        waitTime++
+        await sleepClient(page, 1e3)
+        currentWaitTime++
     }
 }
 
