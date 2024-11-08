@@ -1,4 +1,6 @@
-const puppeteer = require('puppeteer')
+const puppeteer = require('puppeteer-extra')
+const StealthPlugin = require('puppeteer-extra-plugin-stealth')
+puppeteer.use(StealthPlugin())
 
 let processingProfileId = null
 
@@ -6,7 +8,8 @@ async function runCrawler (profile) {
     processingProfileId = profile.id
     logProcessStack('Starting')
     const browser = await puppeteer.launch({
-        headless: true
+        headless: false,
+        args: ["--ash-host-window-bounds=1920x1080", "--window-size=1920,1048", "--window-position=0,0"],
     })
     const page = await browser.newPage()
     await page.setViewport({ width: 1920, height: 1080 })
@@ -39,6 +42,7 @@ async function runCrawler (profile) {
     logProcessStack('Start complete order')
     await page.focus('#checkout-pay-button')
     await page.click('#checkout-pay-button')
+    await waitForCaptcha(page)
     await finishTracking(browser, page, profile)
     logProcessStack('Finished -------------------------------------')
 }
@@ -262,6 +266,27 @@ async function applyTip(page, tipValue) {
         await page.focus('#tipping_list-tipping_list_options-collapsible button[type=submit]')
         await page.keyboard.press('Enter')
     } catch (error) {
+    }
+}
+
+/**
+ * 
+ * @param {puppeteer.Page} page
+ */
+async function waitForCaptcha(page) {
+    const requireCaptcha = await page.$('textarea#g-recaptcha-response')
+    if (!requireCaptcha) {
+        return
+    }
+    let waitTime = 1
+    try {
+        if (waitTime <= 3) {
+            await page.waitForSelector('iframe[src=captcha][data-hcaptcha-response=*]', {
+                timeout: 10e3
+            })
+        }
+    } catch (error) {
+        waitTime++
     }
 }
 

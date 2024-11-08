@@ -15,7 +15,7 @@ app.get('/', (_, res) => {
 
 app.post('/run', async (req, res) => {
   try {
-    await runCrawler(req.body)
+    runCrawler(req.body)
   } catch (error) {
     console.log(error)
   }
