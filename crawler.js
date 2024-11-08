@@ -1,4 +1,3 @@
-const { timeout } = require('puppeteer');
 const puppeteer = require('puppeteer')
 
 let processingProfileId = null
@@ -40,9 +39,6 @@ async function runCrawler (profile) {
     logProcessStack('Start complete order')
     await page.focus('#checkout-pay-button')
     await page.click('#checkout-pay-button')
-    await page.screenshot({
-        path: `results/screenshot-${processingProfileId}.png`,
-    })
     await finishTracking(browser, page, profile)
     logProcessStack('Finished -------------------------------------')
 }
@@ -279,6 +275,9 @@ async function finishTracking(browser, page, _profile) {
     } catch (error) {
 
     }
+    await page.screenshot({
+        path: `results/screenshot-${processingProfileId}.png`,
+    })
     browser.close()
 }
 
