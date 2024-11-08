@@ -1,34 +1,54 @@
 const { timeout } = require('puppeteer');
 const puppeteer = require('puppeteer')
 
+let processingProfileId = null
+
 async function runCrawler (profile) {
+    processingProfileId = profile.id
+    logProcessStack('Starting')
     const browser = await puppeteer.launch({
-        headless: false
-    });
+        headless: true
+    })
     const page = await browser.newPage()
+    await page.setViewport({ width: 1920, height: 1080 })
     await page.goto(`https://${profile.shop}`)
     const currentUrlPath = new URL(page.url())
     const isCombineDiscountCodes = profile.discount.length > 1;
     
     if (currentUrlPath.pathname == '/password') {
+        logProcessStack('Filling store password')
         await fillPassword(page, profile)
     }
     await redirectToRefCode(page, profile)
     await addToCart(page, profile)
     await applyDiscountCode(page, profile.discount)
+    logProcessStack('Go to checkout page')
     await page.goto(`https://${profile.shop}/checkout`)
+    logProcessStack('Filling shipping information')
     await fillCountry(page, profile)
     await fillState(page, profile)
     await fillCustomerInformation(page, profile)
     await focusBodyToLoadShippingRate(page)
     if (isCombineDiscountCodes) {
+        logProcessStack('Apply combine discount')
         await applyOnCheckoutDiscount(page, profile.discount)
     }
+    logProcessStack('Apply tip')
     await applyTip(page, profile.tip)
+    logProcessStack('Filling credit card')
     await fillCreditCard(page)
+    logProcessStack('Start complete order')
     await page.focus('#checkout-pay-button')
     await page.click('#checkout-pay-button')
+    await page.screenshot({
+        path: `results/screenshot-${processingProfileId}.png`,
+    })
     await finishTracking(browser, page, profile)
+    logProcessStack('Finished -------------------------------------')
+}
+
+function logProcessStack(action) {
+    console.log(`[${processingProfileId}]: ${action}`)
 }
 
 /**
@@ -107,6 +127,7 @@ async function applyOnCheckoutDiscount(page, codes) {
  */
 async function applyDiscountCode(page, codes) {
     if (codes.length > 0) {
+        logProcessStack('Apply discount code')
         await page.evaluate(async (code) => {
             await fetch(`/discount/${code}`)
         }, codes[0])
@@ -156,6 +177,7 @@ async function fillPassword(page, profile) {
  * @param {string} code 
  */
 async function addToCart(page, profile) {
+    logProcessStack('Adding to cart')
     await page.evaluate(async (profile) => {
         const form = {
             items: profile.variants.map(e => ({
@@ -215,6 +237,7 @@ async function focusBodyToLoadShippingRate(page) {
  * @param {profile} profile 
  */
 async function redirectToRefCode(page, profile) {
+    logProcessStack('Redirect to affiliate link')
     await page.goto(`https://${profile.shop}?sca_ref=${profile.ref_code}`)
     try {
         await page.waitForRequest('https://pixel-test.uppromote.com/api/logs', {
