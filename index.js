@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const port = 3000
-const runCrawler = require('./crawler')
+const start = require('./crawler')
 const bodyParser = require('body-parser')
 
 app.use(bodyParser.json())
@@ -15,7 +15,7 @@ app.get('/', (_, res) => {
 
 app.post('/run', async (req, res) => {
   try {
-    runCrawler(req.body)
+    start(req.body)
   } catch (error) {
     console.log(error)
   }

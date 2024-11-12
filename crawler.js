@@ -1,6 +1,16 @@
 const puppeteer = require('puppeteer')
 
 let processingProfileId = null
+
+async function start(profile) {
+    try {
+        await runCrawler(profile)
+    } catch (error) {
+        logProcessStack('Finished with error')
+        console.error(error)
+    }
+}
+
 async function runCrawler (profile) {
     processingProfileId = profile.id
     logProcessStack('Starting')
@@ -308,4 +318,4 @@ async function finishTracking(browser, page, _profile) {
     browser.close()
 }
 
-module.exports = runCrawler 
+module.exports = start 
