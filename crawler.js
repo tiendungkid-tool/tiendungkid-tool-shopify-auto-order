@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer')
+const fs = require('fs')
 
 let processingProfileId = null
 
@@ -312,6 +313,11 @@ async function finishTracking(browser, page, _profile) {
     } catch (error) {
 
     }
+
+    if (!fs.existsSync('results')) {
+        fs.mkdirSync('results')
+    }
+
     await page.screenshot({
         path: `results/screenshot-${processingProfileId}.png`,
     })
