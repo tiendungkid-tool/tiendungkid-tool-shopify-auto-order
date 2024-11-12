@@ -223,7 +223,11 @@ async function fillState(page, profile) {
  */
 async function focusBodyToLoadShippingRate(page) {
     await page.focus('input[name=lastName]')
-    await page.waitForSelector('#shipping_methods')
+    try {
+        await page.waitForSelector('#shipping_methods', { timeout: 8e3})
+    } catch (e) {
+        logProcessStack('Skipping shipping method')
+    }
 }
 
 /**
