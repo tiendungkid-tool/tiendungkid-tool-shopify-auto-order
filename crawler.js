@@ -21,7 +21,7 @@ async function runCrawler (profile) {
     const page = await browser.newPage()
     await page.goto(`https://${profile.shop}`)
     const currentUrlPath = new URL(page.url())
-    const isCombineDiscountCodes = profile.discount.length > 1;
+    const isCombineDiscountCodes = profile.discount.length > 1
     
     if (currentUrlPath.pathname == '/password') {
         logProcessStack('Filling store password')
@@ -48,7 +48,6 @@ async function runCrawler (profile) {
     logProcessStack('Start complete order')
     await page.focus('#checkout-pay-button')
     await waitForCaptcha(page)
-    await page.click('#checkout-pay-button')
     await finishTracking(browser, page, profile)
     logProcessStack('Finished -------------------------------------')
 }
@@ -123,7 +122,12 @@ async function applyOnCheckoutDiscount(page, codes) {
     await page.focus('input[name="reductions"]')
     await page.keyboard.type(codes[1], { delay: 100 })
     await page.keyboard.press('Enter')
-    await page.waitForSelector('#gift-card-field form + div ul li:nth-child(2)')
+
+    try {
+        await page.waitForSelector('#gift-card-field form + div ul li:nth-child(2)', { timeout: 3e3 })
+    } catch (e) {
+
+    }
 }
 
 /**
@@ -303,7 +307,22 @@ async function waitForCaptcha(page) {
     }
 }
 
+/**
+ * 
+ * @param {puppeteer.Page} page
+ */
 async function finishTracking(browser, page, _profile) {
+    if (!fs.existsSync('results')) {
+        fs.mkdirSync('results')
+    }
+
+    await page.screenshot({
+        path: `results/screenshot-${processingProfileId}.png`,
+        fullPage: true
+    })
+
+    await page.click('#checkout-pay-button')
+
     try {
         await page.waitForNavigation()
         await page.waitForRequest('https://pixel-test.uppromote.com/api/logs', {
@@ -313,14 +332,6 @@ async function finishTracking(browser, page, _profile) {
     } catch (error) {
 
     }
-
-    if (!fs.existsSync('results')) {
-        fs.mkdirSync('results')
-    }
-
-    await page.screenshot({
-        path: `results/screenshot-${processingProfileId}.png`,
-    })
     browser.close()
 }
 
