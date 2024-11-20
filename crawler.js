@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer')
 const fs = require('fs')
+const config = require('./config')
 
 let processingProfileId = null
 
@@ -13,6 +14,8 @@ async function start(profile) {
 }
 
 async function runCrawler (profile) {
+    console.log(config)
+    
     processingProfileId = profile.id
     logProcessStack('Starting')
     const browser = await puppeteer.launch({
@@ -111,7 +114,7 @@ async function fillCustomerInformation(page, profile) {
         }
         await page.focus(info.selector)
         await page.keyboard.type(String(info.value), {
-            delay: 20
+            delay: config.input_delay
         })
     }
 }
@@ -124,7 +127,7 @@ async function fillCustomerInformation(page, profile) {
 async function applyOnCheckoutDiscount(page, codes) {
     await page.waitForSelector('input[name="reductions"]')
     await page.focus('input[name="reductions"]')
-    await page.keyboard.type(codes[1], { delay: 100 })
+    await page.keyboard.type(codes[1], { delay: config.input_delay })
     await page.keyboard.press('Enter')
 
     try {
@@ -163,14 +166,14 @@ async function fillCreditCard(page) {
     const offset = {x: 213 + 5, y: 11 + 5}
     await page.mouse.click(rect.x + offset.x, rect.y + offset.y)
     await sleepClient(page, 1e3)
-    await page.keyboard.type('1', { delay: 200 })
-    await page.keyboard.press('Tab', { delay: 200 })
-    await page.keyboard.type('1255', { delay: 200 })
-    await page.keyboard.press('Tab', { delay: 200 })
-    await page.keyboard.type('111', { delay: 200 })
-    await page.keyboard.press('Tab', { delay: 200 })
-    await page.keyboard.press('Tab', { delay: 200 })
-    await page.keyboard.type('1', { delay: 200 })
+    await page.keyboard.type('1', { delay: config.input_delay })
+    await page.keyboard.press('Tab', { delay: config.input_delay })
+    await page.keyboard.type('1255', { delay: config.input_delay })
+    await page.keyboard.press('Tab', { delay: config.input_delay })
+    await page.keyboard.type('111', { delay: config.input_delay })
+    await page.keyboard.press('Tab', { delay: config.input_delay })
+    await page.keyboard.press('Tab', { delay: config.input_delay })
+    await page.keyboard.type('1', { delay: config.input_delay })
 }
 
 /**
@@ -180,7 +183,7 @@ async function fillCreditCard(page) {
  */
 async function fillPassword(page, profile) {
     await page.focus('#password')
-    await page.keyboard.type(String(profile.store_password), { delay: 100 })
+    await page.keyboard.type(String(profile.store_password), { delay: config.input_delay })
     await page.keyboard.press('Enter')
     await page.waitForNavigation()
 }
@@ -262,7 +265,6 @@ async function redirectToRefCode(page, profile) {
             timeout: 3e3
         })
     } catch (e) {
-        // Maximum wait tracking click
     }
 }
 
@@ -279,7 +281,7 @@ async function applyTip(page, tipValue) {
     try {
         await page.focus('#TipsInput')
         await page.keyboard.type(String(tipValue), {
-            delay: 100
+            delay: config.input_delay
         })
         await page.focus('#tipping_list-tipping_list_options-collapsible button[type=submit]')
         await page.keyboard.press('Enter')
@@ -330,10 +332,10 @@ async function finishTracking(browser, page, _profile) {
     try {
         await page.waitForNavigation()
         await page.waitForRequest('https://pixel-test.uppromote.com/api/logs')
-        await page.waitForSelector('#checkout-main')
+        await page.waitForSelector('#checkout-main', {
+            timeout: 1e4
+        })
     } catch (error) {
-        waitForCaptcha(page)
-        await page.click('#checkout-pay-button')
     }
 
     browser.close()
