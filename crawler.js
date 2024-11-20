@@ -16,9 +16,13 @@ async function runCrawler (profile) {
     processingProfileId = profile.id
     logProcessStack('Starting')
     const browser = await puppeteer.launch({
-        headless: false
+        headless: false,
+        args: [
+            '--incognito',
+        ]
     })
-    const page = await browser.newPage()
+    const context = browser.defaultBrowserContext();
+    const page = (await context.pages())[0]
     await page.goto(`https://${profile.shop}`)
     const currentUrlPath = new URL(page.url())
     const isCombineDiscountCodes = profile.discount.length > 1
