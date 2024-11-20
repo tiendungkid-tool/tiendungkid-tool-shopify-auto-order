@@ -325,13 +325,13 @@ async function finishTracking(browser, page, _profile) {
 
     try {
         await page.waitForNavigation()
-        await page.waitForRequest('https://pixel-test.uppromote.com/api/logs', {
-            timeout: 3e3
-        })
+        await page.waitForRequest('https://pixel-test.uppromote.com/api/logs')
         await page.waitForSelector('#checkout-main')
     } catch (error) {
-
+        waitForCaptcha(page)
+        await page.click('#checkout-pay-button')
     }
+
     browser.close()
 }
 
