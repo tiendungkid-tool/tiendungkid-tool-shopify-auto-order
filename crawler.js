@@ -158,6 +158,9 @@ async function fillCreditCard(page) {
     await sleepClient(page, 1e3)
     const frameSelector = 'div[data-card-fields=number] iframe'
     await page.focus(frameSelector)
+    await sleepClient(page, 1e3)
+    await page.focus(frameSelector)
+    await sleepClient(page, 2e3)
     const frame = await page.waitForSelector(frameSelector)
     const rect = await page.evaluate(el => {
         const {x, y} = el.getBoundingClientRect()
