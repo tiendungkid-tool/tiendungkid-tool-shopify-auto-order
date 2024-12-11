@@ -158,7 +158,7 @@ async function fillCreditCard(page) {
     await sleepClient(page, 1e3)
     const frameSelector = 'div[data-card-fields=number] iframe'
     await page.focus(frameSelector)
-    await sleepClient(page, 1e3)
+    await sleepClient(page, 500)
     await page.focus(frameSelector)
     await sleepClient(page, 2e3)
     const frame = await page.waitForSelector(frameSelector)
@@ -288,6 +288,7 @@ async function applyTip(page, tipValue) {
         })
         await page.focus('#tipping_list-tipping_list_options-collapsible button[type=submit]')
         await page.keyboard.press('Enter')
+        await page.waitForSelector('#tipping_list-tipping_list_options-collapsible button[type=submit]:disabled')
     } catch (error) {
     }
 }
