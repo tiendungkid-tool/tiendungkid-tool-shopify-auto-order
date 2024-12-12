@@ -14,9 +14,8 @@ async function start(profile) {
 }
 
 async function runCrawler (profile) {
-    console.log(config)
-    
     processingProfileId = profile.id
+    logProcessStack('Input delay: ' + config.input_delay)
     logProcessStack('Starting')
     const browser = await puppeteer.launch({
         headless: false,
@@ -160,9 +159,6 @@ async function fillCreditCard(page) {
     await sleepClient(page, 1e3)
     const frameSelector = 'div[data-card-fields=number] iframe'
     await page.focus(frameSelector)
-    await sleepClient(page, 500)
-    await page.focus(frameSelector)
-    await sleepClient(page, 2e3)
     const frame = await page.waitForSelector(frameSelector)
     const rect = await page.evaluate(el => {
         const {x, y} = el.getBoundingClientRect()
@@ -179,6 +175,8 @@ async function fillCreditCard(page) {
     await page.keyboard.press('Tab', { delay: config.input_delay })
     await page.keyboard.press('Tab', { delay: config.input_delay })
     await page.keyboard.type('1', { delay: config.input_delay })
+    await focusBodyToLoadShippingRate(page, '#TipsInput', null)
+    await sleepClient(page, 1e3)
 }
 
 /**
@@ -248,10 +246,13 @@ async function fillState(page, profile) {
 /**
  * @param {puppeteer.Page} page 
  */
-async function focusBodyToLoadShippingRate(page) {
-    await page.focus('input[name=lastName]')
+async function focusBodyToLoadShippingRate(page, focusTo = 'input[name=lastName]', wantLoaded = '#shipping_methods') {
     try {
-        await page.waitForSelector('#shipping_methods', { timeout: 8e3})
+        await page.focus(focusTo)
+        if (!wantLoaded) {
+            return
+        }
+        await page.waitForSelector(wantLoaded, { timeout: 8e3})
     } catch (e) {
         logProcessStack('Skipping shipping method')
     }
@@ -289,11 +290,14 @@ async function applyTip(page, tipValue) {
             delay: config.input_delay
         })
         await page.focus('#tipping_list-tipping_list_options-collapsible button[type=submit]')
+        await sleepClient(page, 1e3)
         await page.keyboard.press('Enter')
         await page.waitForFunction(async () => {
             const selector = `div[aria-labelledby="MoneyLine-Heading0"]`
             const node = document.querySelector(selector)
             return node.textContent.includes('Tip')
+        }, {
+            timeout: 2e3
         })
     } catch (error) {
     }
@@ -341,9 +345,9 @@ async function finishTracking(browser, page, _profile) {
 
     try {
         await page.waitForNavigation()
-        await page.waitForRequest('https://pixel-test.uppromote.com/api/logs')
+        await page.waitForResponse('https://pixel-test.uppromote.com/api/logs')
         await page.waitForSelector('#checkout-main', {
-            timeout: 1e4
+            timeout: 5e3
         })
     } catch (error) {
     }
