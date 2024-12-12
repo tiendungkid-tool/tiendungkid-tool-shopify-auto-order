@@ -22,10 +22,12 @@ async function runCrawler (profile) {
         headless: false,
         args: [
             '--incognito',
+            '--start-maximized'
         ]
     })
-    const context = browser.defaultBrowserContext();
+    const context = browser.defaultBrowserContext()
     const page = (await context.pages())[0]
+    await page.setViewport({ width: 1920, height: 1080})
     await page.goto(`https://${profile.shop}`)
     const currentUrlPath = new URL(page.url())
     const isCombineDiscountCodes = profile.discount.length > 1
@@ -264,8 +266,8 @@ async function redirectToRefCode(page, profile) {
     logProcessStack('Redirect to affiliate link')
     await page.goto(`https://${profile.shop}?sca_ref=${profile.ref_code}`)
     try {
-        await page.waitForRequest('https://pixel-test.uppromote.com/api/logs', {
-            timeout: 3e3
+        await page.waitForResponse('https://pixel-test.uppromote.com/api/logs', {
+            timeout: 2e3
         })
     } catch (e) {
     }
@@ -288,7 +290,11 @@ async function applyTip(page, tipValue) {
         })
         await page.focus('#tipping_list-tipping_list_options-collapsible button[type=submit]')
         await page.keyboard.press('Enter')
-        await page.waitForSelector('#tipping_list-tipping_list_options-collapsible button[type=submit]:disabled')
+        await page.waitForFunction(async () => {
+            const selector = `div[aria-labelledby="MoneyLine-Heading0"]`
+            const node = document.querySelector(selector)
+            return node.textContent.includes('Tip')
+        })
     } catch (error) {
     }
 }
