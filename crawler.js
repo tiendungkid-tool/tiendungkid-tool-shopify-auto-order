@@ -27,7 +27,9 @@ async function runCrawler (profile) {
     const context = browser.defaultBrowserContext()
     const page = (await context.pages())[0]
     await page.setViewport({ width: 1920, height: 1080})
-    await page.goto(`https://${profile.shop}`)
+    await page.goto(`https://${profile.shop}`, {
+        timeout: 0
+    })
     const currentUrlPath = new URL(page.url())
     const isCombineDiscountCodes = profile.discount.length > 1
     
@@ -39,7 +41,9 @@ async function runCrawler (profile) {
     await addToCart(page, profile)
     await applyDiscountCode(page, profile.discount)
     logProcessStack('Go to checkout page')
-    await page.goto(`https://${profile.shop}/checkout`)
+    await page.goto(`https://${profile.shop}/checkout`, {
+        timeout: 0
+    })
     logProcessStack('Filling shipping information')
     await fillCountry(page, profile)
     await fillState(page, profile)
@@ -265,7 +269,9 @@ async function focusBodyToLoadShippingRate(page, focusTo = 'input[name=lastName]
  */
 async function redirectToRefCode(page, profile) {
     logProcessStack('Redirect to affiliate link')
-    await page.goto(`https://${profile.shop}?sca_ref=${profile.ref_code}`)
+    await page.goto(`https://${profile.shop}?sca_ref=${profile.ref_code}`, {
+        timeout: 0
+    })
     try {
         await page.waitForResponse('https://pixel-test.uppromote.com/api/logs', {
             timeout: 2e3
@@ -344,7 +350,9 @@ async function finishTracking(browser, page, _profile) {
     await page.click('#checkout-pay-button')
 
     try {
-        await page.waitForNavigation()
+        await page.waitForNavigation({
+            timeout: 0
+        })
         await page.waitForResponse('https://pixel-test.uppromote.com/api/logs')
         await page.waitForSelector('#checkout-main', {
             timeout: 5e3
