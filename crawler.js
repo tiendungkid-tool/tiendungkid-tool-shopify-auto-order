@@ -20,7 +20,7 @@ async function runCrawler (profile) {
     const browser = await puppeteer.launch({
         headless: false,
         args: [
-            '--incognito',
+            // '--incognito',
             '--start-maximized'
         ]
     })
@@ -353,7 +353,9 @@ async function finishTracking(browser, page, _profile) {
         await page.waitForNavigation({
             timeout: 0
         })
-        await page.waitForResponse('https://pixel-test.uppromote.com/api/logs')
+        await page.waitForResponse('https://pixel-test.uppromote.com/api/logs', {
+            timeout: 3e3
+        })
         await page.waitForSelector('#checkout-main', {
             timeout: 5e3
         })
