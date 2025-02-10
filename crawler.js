@@ -351,10 +351,10 @@ async function finishTracking(browser, page, _profile) {
 
     try {
         await page.waitForNavigation({
-            timeout: 0
+            timeout: 10e3
         })
         await page.waitForResponse('https://pixel-test.uppromote.com/api/logs', {
-            timeout: 3e3
+            timeout: 5e3
         })
         await page.waitForSelector('#checkout-main', {
             timeout: 5e3
